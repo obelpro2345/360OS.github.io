@@ -1,0 +1,309 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>360OS • Tablet (Touch + Gamepad Universal)</title>
+  <meta name="theme-color" content="#0a8f3a">
+  <style>
+    :root{
+      --bg:#0c0c0c; --panel:#121212; --text:#f2f2f2; --muted:#b9b9b9;
+      --accent:#17c15a; --accent-2:#0a8f3a; --border:#2a2a2a; --card:#1a1a1a;
+      --radius:16px; --gap:14px; --shadow:0 6px 16px rgba(0,0,0,.35);
+      --hit:56px; /* tamaño táctil mínimo */
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%;background:var(--bg);color:var(--text);font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif}
+    body{margin:0;display:flex;flex-direction:column}
+    /* Barra superior */
+    .topbar{
+      position:sticky; top:0; z-index:10; display:flex; align-items:center; gap:10px;
+      background:linear-gradient(180deg,#0e0e0e,#101010);
+      border-bottom:1px solid var(--border); padding:12px 16px;
+    }
+    .logo{display:flex;align-items:center;gap:10px;font-weight:800}
+    .badge{width:22px;height:22px;border-radius:6px;background:var(--accent)}
+    .nav{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap}
+    .tab{
+      min-height:var(--hit); padding:10px 16px; border-radius:12px; border:1px solid var(--border);
+      background:var(--panel); color:var(--text); font-weight:700; cursor:pointer; transition:.15s;
+    }
+    .tab.active{border-color:var(--accent); outline:2px solid color-mix(in oklab, var(--accent) 40%, transparent)}
+    /* Contenido */
+    .content{padding:16px;display:grid;grid-template-columns:repeat(2,1fr);gap:var(--gap)}
+    .section{grid-column:1/-1}
+    .section h2{margin:0 0 10px; font-size:18px; color:var(--muted); font-weight:800}
+    .card{
+      background:var(--card); border:1px solid var(--border); border-radius:var(--radius);
+      box-shadow:var(--shadow); padding:14px; display:flex; flex-direction:column; gap:12px; min-height:140px;
+    }
+    .row{display:flex; align-items:center; gap:12px; flex-wrap:wrap}
+    .pill{padding:8px 12px; border-radius:999px; background:#141414; border:1px solid var(--border); color:var(--muted); font-weight:600}
+    .btn{
+      min-height:var(--hit); padding:12px 16px; border-radius:14px; border:1px solid var(--border);
+      background:var(--panel); color:var(--text); font-weight:800; cursor:pointer;
+    }
+    .btn.primary{background:var(--accent-2); border-color:color-mix(in oklab, var(--accent-2) 70%, #000 30%)}
+    .footer{margin-top:auto; padding:10px 16px; border-top:1px solid var(--border); color:var(--muted); display:flex; justify-content:space-between}
+    /* HUD táctil opcional (overlay) */
+    .hud{
+      position:fixed; bottom:12px; left:12px; right:12px; z-index:20; display:flex; justify-content:space-between; pointer-events:auto;
+    }
+    .pad-left, .pad-right{display:flex; gap:10px}
+    .hud .btn{backdrop-filter:blur(6px); background:rgba(20,20,20,.75)}
+    /* Responsivo */
+    @media (max-width:900px){ .content{grid-template-columns:1fr} }
+    @media (prefers-reduced-motion: reduce){ .tab{transition:none} }
+  </style>
+</head>
+<body>
+  <header class="topbar" role="navigation" aria-label="Navegación principal">
+    <div class="logo">
+      <div class="badge" aria-hidden="true"></div>
+      <div>360OS • Tablet</div>
+    </div>
+    <nav class="nav" aria-label="Secciones">
+      <button class="tab active" data-view="home" aria-pressed="true">Inicio</button>
+      <button class="tab" data-view="games">Juegos</button>
+      <button class="tab" data-view="market">Mercado</button>
+      <button class="tab" data-view="settings">Ajustes</button>
+    </nav>
+  </header>
+
+  <main class="content" id="content" tabindex="-1" aria-live="polite">
+    <!-- Inicio -->
+    <section class="section" data-view="home">
+      <h2>Inicio</h2>
+      <div class="card">
+        <div class="row">
+          <strong>Touch + Gamepad Universal</strong>
+          <span class="pill" id="padStatus">Sin gamepad</span>
+          <span class="pill" id="touchStatus">Touch listo</span>
+        </div>
+        <div class="row">
+          <button class="btn primary" id="startBtn">Entrar</button>
+          <button class="btn" id="resumeBtn">Resumir</button>
+          <button class="btn" id="vibrateBtn">Vibrar</button>
+        </div>
+        <div class="row">
+          <span class="pill">Swipe ◀ ▶ cambia sección</span>
+          <span class="pill">A/X/B/Start/+ navegan</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Juegos -->
+    <section class="section" data-view="games" hidden>
+      <h2>Juegos</h2>
+      <div class="card">
+        <div class="row">
+          <button class="btn primary">AAA</button>
+          <button class="btn">Arcade</button>
+          <button class="btn">Aleatorios</button>
+        </div>
+        <div class="row">
+          <span class="pill">Selecciona con Confirmar</span>
+          <span class="pill">Atrás para volver</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Mercado -->
+    <section class="section" data-view="market" hidden>
+      <h2>Mercado</h2>
+      <div class="card">
+        <div class="row">
+          <button class="btn primary">Comprar Pase</button>
+          <button class="btn">Ver Tix</button>
+          <button class="btn">Catálogo</button>
+        </div>
+        <div class="row"><span class="pill">Anti-estafas activo</span></div>
+      </div>
+    </section>
+
+    <!-- Ajustes -->
+    <section class="section" data-view="settings" hidden>
+      <h2>Ajustes</h2>
+      <div class="card">
+        <div class="row">
+          <button class="btn" id="toggleHud">Mostrar/Ocultar HUD táctil</button>
+          <button class="btn" id="gridToggle">Cambiar columnas</button>
+          <button class="btn" id="infoBtn">Info Gamepad</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- HUD táctil opcional -->
+  <div class="hud" id="hud" hidden>
+    <div class="pad-left">
+      <button class="btn" data-dir="left">◀</button>
+      <button class="btn" data-dir="right">▶</button>
+    </div>
+    <div class="pad-right">
+      <button class="btn" data-act="confirm">Confirmar</button>
+      <button class="btn" data-act="back">Atrás</button>
+      <button class="btn" data-act="menu">Menú</button>
+    </div>
+  </div>
+
+  <footer class="footer">
+    <span>© 360OS</span>
+    <span>Tablet build • Solo touch + gamepad universal</span>
+  </footer>
+
+  <script>
+    // --- Navegación por pestañas ---
+    const tabs = Array.from(document.querySelectorAll('.tab'));
+    const sections = Array.from(document.querySelectorAll('.section'));
+    const content = document.getElementById('content');
+    function show(view){
+      sections.forEach(s=>{ s.hidden = s.dataset.view !== view; });
+      tabs.forEach(t=>{
+        const active = t.dataset.view === view;
+        t.classList.toggle('active', active);
+        t.setAttribute('aria-pressed', active);
+      });
+      content.focus({preventScroll:true});
+    }
+    tabs.forEach(t=>t.addEventListener('click', ()=>show(t.dataset.view)));
+    show('home');
+
+    // --- Touch: gestos swipe para cambiar sección ---
+    const order = ['home','games','market','settings'];
+    let startX = 0;
+    content.addEventListener('touchstart', e => { startX = e.touches[0].clientX; }, {passive:true});
+    content.addEventListener('touchend', e => {
+      const endX = e.changedTouches[0].clientX;
+      const delta = endX - startX;
+      const threshold = 60;
+      const current = order.findIndex(v => !document.querySelector(`.section[data-view="${v}"]`).hidden);
+      if(Math.abs(delta) > threshold){
+        const next = delta < 0 ? Math.min(order.length-1, current+1) : Math.max(0, current-1);
+        show(order[next]);
+      }
+    }, {passive:true});
+    document.getElementById('touchStatus').textContent = 'Touch listo (swipe ◀▶)';
+
+    // --- Botones táctiles HUD ---
+    const hud = document.getElementById('hud');
+    document.getElementById('toggleHud').addEventListener('click', ()=>{
+      hud.hidden = !hud.hidden;
+    });
+    document.querySelectorAll('[data-dir]').forEach(b=>{
+      b.addEventListener('click', ()=>{
+        const current = order.findIndex(v => !document.querySelector(`.section[data-view="${v}"]`).hidden);
+        show(b.dataset.dir === 'right' ? order[Math.min(order.length-1, current+1)] : order[Math.max(0, current-1)]);
+        navigator.vibrate && navigator.vibrate(10);
+      });
+    });
+    document.querySelectorAll('[data-act]').forEach(b=>{
+      b.addEventListener('click', ()=>{
+        const act = b.dataset.act;
+        if(act==='confirm') alert('Confirmar (touch)');
+        if(act==='back') alert('Atrás (touch)');
+        if(act==='menu') alert('Menú (touch)');
+        navigator.vibrate && navigator.vibrate(10);
+      });
+    });
+
+    // --- Acciones básicas ---
+    document.getElementById('startBtn').addEventListener('click', ()=>alert('Entrando…'));
+    document.getElementById('resumeBtn').addEventListener('click', ()=>alert('Resumiendo…'));
+    document.getElementById('vibrateBtn').addEventListener('click', ()=>{
+      if(navigator.vibrate) navigator.vibrate([10,30,10]); else alert('Sin vibración');
+    });
+    document.getElementById('gridToggle').addEventListener('click', ()=>{
+      const c = document.querySelector('.content');
+      const isTwo = getComputedStyle(c).gridTemplateColumns.includes('repeat(2');
+      c.style.gridTemplateColumns = isTwo ? '1fr' : 'repeat(2,1fr)';
+    });
+    document.getElementById('infoBtn').addEventListener('click', ()=>{
+      alert('Conecta tu control por USB/Bluetooth. Soporte: Xbox, PlayStation, Nintendo (Gamepad API).');
+    });
+
+    // --- Gamepad Universal ---
+    const padStatus = document.getElementById('padStatus');
+
+    // Mapa universal de botones por familia
+    const MAPS = {
+      xbox:      { confirm:0, cancel:1, menu:7,  up:12, down:13, left:14, right:15 }, // A,B,Start,D-pad
+      play:      { confirm:1, cancel:2, menu:9,  up:12, down:13, left:14, right:15 }, // X,O,Options,D-pad
+      nintendo:  { confirm:1, cancel:0, menu:9,  up:12, down:13, left:14, right:15 }  // B,A,+,D-pad
+    };
+    // Variantes de identificación (id contiene estas palabras)
+    const ID_FAMILY = [
+      { family:'xbox',     match:['xbox','xinput'] },
+      { family:'play',     match:['playstation','dualshock','dualsense','wireless controller'] },
+      { family:'nintendo', match:['nintendo','pro controller','wii u'] }
+    ];
+
+    function familyFromId(id){
+      const low = id.toLowerCase();
+      for(const f of ID_FAMILY){
+        if(f.match.some(m=>low.includes(m))) return f.family;
+      }
+      // Fallback: intenta por layout común
+      if(low.includes('controller')) return 'xbox';
+      return 'xbox';
+    }
+
+    let rafId = null;
+    function loop(){
+      const pads = navigator.getGamepads ? navigator.getGamepads() : [];
+      for(const pad of pads){
+        if(!pad) continue;
+        const fam = familyFromId(pad.id);
+        const map = MAPS[fam];
+        // Botones
+        const btn = pad.buttons;
+        // Acciones principales
+        if(btn[map.confirm]?.pressed) actionConfirm(fam);
+        if(btn[map.cancel]?.pressed)  actionBack(fam);
+        if(btn[map.menu]?.pressed)    actionMenu(fam);
+        // D-pad para cambiar sección
+        if(btn[map.right]?.pressed) navRight();
+        if(btn[map.left]?.pressed)  navLeft();
+        if(btn[map.up]?.pressed)    pulse('up');
+        if(btn[map.down]?.pressed)  pulse('down');
+        // Ejes (sticks) mínimos para navegación lateral
+        if(Math.abs(pad.axes[0]||0) > 0.6){
+          (pad.axes[0] > 0 ? navRight() : navLeft());
+        }
+      }
+      rafId = requestAnimationFrame(loop);
+    }
+
+    function actionConfirm(fam){
+      navigator.vibrate && navigator.vibrate(8);
+      alert('Confirmar ('+fam+')');
+    }
+    function actionBack(fam){
+      navigator.vibrate && navigator.vibrate(8);
+      alert('Atrás ('+fam+')');
+    }
+    function actionMenu(fam){
+      navigator.vibrate && navigator.vibrate(8);
+      alert('Menú ('+fam+')');
+    }
+    function navRight(){
+      const current = order.findIndex(v => !document.querySelector(`.section[data-view="${v}"]`).hidden);
+      show(order[Math.min(order.length-1, current+1)]);
+    }
+    function navLeft(){
+      const current = order.findIndex(v => !document.querySelector(`.section[data-view="${v}"]`).hidden);
+      show(order[Math.max(0, current-1)]);
+    }
+    function pulse(dir){ /* placeholder visual si quieres añadir animación */ }
+
+    window.addEventListener('gamepadconnected', e=>{
+      padStatus.textContent = 'Gamepad conectado';
+      if(!rafId) loop();
+    });
+    window.addEventListener('gamepaddisconnected', ()=>{
+      padStatus.textContent = 'Sin gamepad';
+      if(rafId){ cancelAnimationFrame(rafId); rafId = null; }
+    });
+  </script>
+</body>
+</html>
